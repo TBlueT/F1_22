@@ -33,6 +33,12 @@ class Process(QtCore.QThread):
             3: "color: rgb(255, 0, 0); background-color: rgb(0, 0, 0);"
         }
 
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        self.f1_22_pi_ip = str(s.getsockname()[0])
+        s.close()
+        print(self.f1_22_pi_ip)
+
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind(('0.0.0.0', 20777))
         self.sock.settimeout(0.5)
@@ -93,8 +99,8 @@ class Process(QtCore.QThread):
                 if time.time() - self.ck_game_udp_time > self.ck_game_udp_out_time:
                     self.ck_game_start = False
                     self.Set_page.emit(1)
-                    ck_ip = socket.gethostbyname(socket.gethostname())
-                    ck_ip = "No internet connection." if ck_ip == "127.0.0.1" else F"iP: {ck_ip}"
+                    ck_ip = self.f1_22_pi_ip
+                    ck_ip = "No internet connection." if ck_ip in ["127.0.0.1", "127.0.1.1"] else F"iP: {ck_ip}"
                     self.Set_Text.emit("label", ck_ip)
                     self.ck_game_udp_time = time.time()
 
