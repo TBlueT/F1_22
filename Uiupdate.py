@@ -10,7 +10,7 @@ class UiUpdate(QThread):
 
         self.paint = parent
         self.prev_time = 0
-        self.FPS = 15
+        self.FPS = 10
 
     def run(self):
         while self.run_stop:
