@@ -1,4 +1,4 @@
-# F1_22_UDP
+# F1_22_RaspberryPi_3.5Lcd
 
 The program was written based on Raspberry Pi.
 
