@@ -36,6 +36,7 @@ class mainWindow(QMainWindow, GUI_class):
         self.data_process.Set_Text.connect(self.Set_Text)
         self.data_process.Set_Pixmap.connect(self.Set_Pixmap)
         self.data_process.Set_StyleSheet.connect(self.Set_StyleSheet)
+        self.data_process.Set_page.connect(self.Set_page)
         self.ui_update.start()
         self.L.start()
         self.data_process.start()
@@ -62,6 +63,9 @@ class mainWindow(QMainWindow, GUI_class):
         self.lock.lock()
         self.setStyleSheet_Waiting[object] = data
         self.lock.unlock()
+    @pyqtSlot(int)
+    def Set_page(self, page):
+        self.stackedWidget_4.setCurrentIndex(page)
     
     def Set_object_init(self):                      # Clear display storage.
         self.setStyleSheet_Waiting = {}

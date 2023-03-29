@@ -6,7 +6,6 @@ class PackedLittleEndianStructure(ctypes.LittleEndianStructure):
 
 
 class PacketHeader(PackedLittleEndianStructure):
-
     _fields_ = [
         ("packetFormat", ctypes.c_uint16),
         ("gameMajorVersion", ctypes.c_uint8),
@@ -268,6 +267,32 @@ class PacketCarDamageData(PackedLittleEndianStructure):
         ("header", PacketHeader),
         ("CarDamageData", CarDamageData * 22)
     ]
+class FinalClassificationData(PackedLittleEndianStructure):
+
+    _fields_ = [
+        ("position", ctypes.c_uint8),
+        ("numLaps", ctypes.c_uint8),
+        ("gridPosition", ctypes.c_uint8),
+        ("points", ctypes.c_uint8),
+        ("numPitStops", ctypes.c_uint8),
+        ("resultStatus", ctypes.c_uint8),
+
+        ("bestLapTimeInMS", ctypes.c_uint32),
+        ("totalRaceTime", ctypes.c_float),
+        ("penaltiesTime", ctypes.c_uint8),
+        ("numPenalties", ctypes.c_uint8),
+        ("numTyreStints", ctypes.c_uint8),
+        ("tyreStintsActual", ctypes.c_uint8 *8),
+        ("tyreStintsVisual", ctypes.c_uint8 *8),
+        ("tyreStintSEndLaps", ctypes.c_uint8 *8)
+    ]
+class PacketFinalClassificationData(PackedLittleEndianStructure):
+
+    _fields_ = [
+        ("header", PacketHeader),
+        ("numCars", ctypes.c_uint8),
+        ("classificationData", FinalClassificationData)
+    ]
 
 PacketType = {
     (2022, 1, 0): PacketMotionData,
@@ -275,6 +300,7 @@ PacketType = {
     (2022, 1, 2): PacketLapData,
     (2022, 1, 6): PacketCarTelemetryData,
     (2022, 1, 7): PacketCarStatusData,
+    (2022, 1, 8): PacketFinalClassificationData,
     (2022, 1, 10): PacketCarDamageData
 }
 
