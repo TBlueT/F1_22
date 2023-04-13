@@ -10,16 +10,16 @@ class UiUpdate(QThread):
 
         self.paint = parent
         self.prev_time = 0
-        self.FPS = 10
+        self.FPS = 9
 
     def run(self):
         while self.run_stop:
 
             current_time = timeit.default_timer() - self.prev_time
             if (current_time > 1. / self.FPS):
-                self.paint.set_img_Go()
-                # FPS = int(1. / current_time)
-                # print(FPS)
+                #self.paint.set_img_Go()
+                #FPS = int(1. / current_time)
+                #print(FPS)
                 self.prev_time = timeit.default_timer()
 
             QTest.qWait(100)

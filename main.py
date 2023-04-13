@@ -37,7 +37,7 @@ class mainWindow(QMainWindow, GUI_class):
         self.data_process.Set_Pixmap.connect(self.Set_Pixmap)
         self.data_process.Set_StyleSheet.connect(self.Set_StyleSheet)
         self.data_process.Set_page.connect(self.Set_page)
-        self.ui_update.start()
+        #self.ui_update.start()
         self.L.start()
         self.data_process.start()
 
@@ -73,8 +73,8 @@ class mainWindow(QMainWindow, GUI_class):
         self.setPixmax_Waiting = {}
     
     def set_img_Go(self):                           # Display screen update.
-        self.lock.lock()
-        self.setUpdatesEnabled(False)
+        #self.lock.lock()
+        #self.setUpdatesEnabled(False)
         try:
             if self.setText_Waiting != {}:
                 for data in self.setText_Waiting:
@@ -88,10 +88,10 @@ class mainWindow(QMainWindow, GUI_class):
 
         except Exception as e:
             print(F"set img: {e}")
-
-        self.setUpdatesEnabled(True)
+        #time.sleep(0.01)
+        #self.setUpdatesEnabled(True)
         self.Set_object_init()
-        self.lock.unlock()
+        #self.lock.unlock()
 
     def closeEvent(self, evant):
         self.udp_pack.Working = False

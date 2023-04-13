@@ -23,6 +23,7 @@ class Process(QtCore.QThread):
         self.drs_toggle: bool = False
         self.Lap_all: int = 0
         self.Lap_count: int = 0
+        self.drs_old_data = 0
         self.img_init()
         
         self.ersDeployMode_text = {0: "None", 1: "Medium", 2: "HotLap", 3: "Overtake"}
@@ -32,7 +33,10 @@ class Process(QtCore.QThread):
             2: "color: rgb(255, 255, 0); background-color: rgb(0, 0, 0);",
             3: "color: rgb(255, 0, 0); background-color: rgb(0, 0, 0);"
         }
+        self.ersDeployMode_styleheet_old_data = ""
 
+        self.RPM_Gear_old_data = 0
+        
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(("8.8.8.8", 80))
         self.f1_22_pi_ip = str(s.getsockname()[0])
@@ -72,6 +76,7 @@ class Process(QtCore.QThread):
             except:
                 pass
             if buf:
+                #self.mainWindow.lock.lock()
                 if buf.header.packetId == 1:
                     self.Packet_SessionData_Process(buf)
 
@@ -95,6 +100,8 @@ class Process(QtCore.QThread):
 
                     self.ck_game_start = True
                 self.ck_game_udp_time = time.time()
+                #self.mainWindow.lock.unlock()
+                self.mainWindow.set_img_Go()
             else:
                 if time.time() - self.ck_game_udp_time > self.ck_game_udp_out_time:
                     self.ck_game_start = False
@@ -104,7 +111,7 @@ class Process(QtCore.QThread):
                     self.Set_Text.emit("label", ck_ip)
                     self.ck_game_udp_time = time.time()
 
-            time.sleep(0.000001)
+            #time.sleep(0.001)
 
     def Packet_SessionData_Process(self, dataPack):
         self.All_Lap(dataPack)
@@ -168,9 +175,10 @@ class Process(QtCore.QThread):
     def Drs(self, DataPack):
         drs_situation = DataPack.carTelemetryData[DataPack.header.playerCarIndex].drs
         self.drs_toggle = True if drs_situation else False
-        
         if self.drs_toggle:
-            self.Set_StyleSheet.emit("Drs_led", "color: rgb(255, 255, 255);background-color: rgb(0, 255, 0);")
+            if self.drs_old_data != 1:
+                self.Set_StyleSheet.emit("Drs_led", "color: rgb(255, 255, 255);background-color: rgb(0, 255, 0);")
+                self.drs_old_data = 1
 
     def Gear_Process(self, DataPack):
         Gear = DataPack.carTelemetryData[DataPack.header.playerCarIndex].gear
@@ -183,9 +191,13 @@ class Process(QtCore.QThread):
         self.LED_bar = int(self.map(self.LED_bar, 0, 100, 0, 8))
 
         if self.LED_bar > 4:
-          self.Set_StyleSheet.emit("Gear", "color: rgb(255,0,0);")
+            if self.RPM_Gear_old_data != 1:
+                self.Set_StyleSheet.emit("Gear", "color: rgb(255,0,0);")
+                self.RPM_Gear_old_data = 1
         else:
-          self.Set_StyleSheet.emit("Gear", "color: rgb(255,255,255);")
+            if self.RPM_Gear_old_data != 2:
+                self.Set_StyleSheet.emit("Gear", "color: rgb(255,255,255);")
+                self.RPM_Gear_old_data = 2
         try:
             self.mainWindow.L.wr(self.LED_bar)
         except:
@@ -194,7 +206,10 @@ class Process(QtCore.QThread):
     def Ers(self, DataPack):
         ersDeployMode_num = DataPack.carStatusData[DataPack.header.playerCarIndex].ersDeployMode
         self.Set_Text.emit("RES_Mode", F"{self.ersDeployMode_text[ersDeployMode_num]}")
-        self.Set_StyleSheet.emit("RES_Mode", self.ersDeployMode_styleheet[ersDeployMode_num])
+        temp = self.ersDeployMode_styleheet[ersDeployMode_num]
+        if self.ersDeployMode_styleheet_old_data != temp:
+            self.Set_StyleSheet.emit("RES_Mode", temp)
+            self.ersDeployMode_styleheet_old_data = temp
 
         ErsNow = int(self.map(DataPack.carStatusData[DataPack.header.playerCarIndex].ersStoreEnergy, 0, 4000000, 0, 100))
         ersStoreEnergy_img = self.ersStoreEnergy_bar.scaled(int(
@@ -214,10 +229,13 @@ class Process(QtCore.QThread):
     def Drs_Available(self, DataPack):
         drs_allowed = DataPack.carStatusData[DataPack.header.playerCarIndex].drsAllowed
         if (not self.drs_toggle) and (drs_allowed == 1):
-            self.Set_StyleSheet.emit("Drs_led", "color: rgb(255, 255, 255);background-color: rgb(255, 0, 0);")
+            if self.drs_old_data != 2:
+                self.Set_StyleSheet.emit("Drs_led", "color: rgb(255, 255, 255);background-color: rgb(255, 0, 0);")
+                self.drs_old_data = 2
         elif (not self.drs_toggle) and (drs_allowed == 0):
-            self.Set_StyleSheet.emit("Drs_led", "color: rgb(255, 255, 255);background-color: rgb(0, 0, 0);")
-
+            if self.drs_old_data != 3:
+                self.Set_StyleSheet.emit("Drs_led", "color: rgb(255, 255, 255);background-color: rgb(0, 0, 0);")
+                self.drs_old_data = 3
 
     def map(self, x, in_min, in_max, out_min, out_max):
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
